@@ -6,14 +6,18 @@ import os
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/zayphoe")
+# Get DATABASE_URL from environment or use local SQLite as fallback
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./zayphoe.db")
 
-# Render and other providers often provide URLs starting with postgres://
-# but SQLAlchemy strictly requires postgresql://
+# Render/Heroku provide URLs starting with postgres:// but SQLAlchemy needs postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URL)
+# Configure engine based on DB type
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
