@@ -11,17 +11,17 @@ SECRET_KEY = os.getenv("SECRET_KEY", "changeme-super-secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 10080))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    """Hash password using bcrypt, truncating to 72 chars to stay within bcrypt limits."""
-    return pwd_context.hash(password[:72])
+    """Hash password using PBKDF2."""
+    return pwd_context.hash(password)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verify password using bcrypt, truncating to 72 chars to stay within bcrypt limits."""
-    return pwd_context.verify(plain[:72], hashed)
+    """Verify password using PBKDF2."""
+    return pwd_context.verify(plain, hashed)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
